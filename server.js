@@ -208,49 +208,66 @@ function view_all_emp() {
 }
 
 function upd_emp_role() {
-    let emp = [];
-    connection.query("SELECT * FROM employee", function(err, answer) {
-      // console.log(answer);
-      for (let i = 0; i < answer.length; i++) {
-        let emplist =
-          answer[i].empid + " " + answer[i].first_name + " " + answer[i].last_name;
-        emp.push(emplist);
-      }
-      // console.log(allemp)
-  
-      inquirer
-        .prompt([
-          {
-            type: "list",
-            name: "updateEmpRole",
-            message: "select employee to update role",
-            choices: allemp
-          },
-          {
-            type: "list",
-            message: "select new role",
-            choices: ["manager", "employee"],
-            name: "newrole"
+  let allemp = [];
+  let role = [
+    "Sales Lead",
+    "Sales person",
+    "Lead Engineer",
+    "Software Engineer",
+    "Account Manager",
+    "Accountant",
+    "Legal Team Lead",
+    "Lawyer",
+  ];
+  connection.query("SELECT * FROM employee", function (err, answer) {
+    // console.log(answer);
+    for (let i = 0; i < answer.length; i++) {
+      let employeeString =
+        answer[i].empid +
+        " " +
+        answer[i].first_name +
+        " " +
+        answer[i].last_name;
+      allemp.push(employeeString);
+    }
+    // console.log(allemp)
+
+    inquirer
+      .prompt([
+        {
+          type: "list",
+          name: "updateEmpRole",
+          message: "select employee to update role",
+          choices: allemp,
+        },
+        {
+          type: "list",
+          message: "select new role",
+          choices: role,
+          name: "newrole",
+        },
+      ])
+      .then(function (answers) {
+        console.log("about to update", answers);
+        const idToUpdate = {};
+        idToUpdate.employeeId = parseInt(answers.updateEmpRole.split(" ")[0]);
+        if (answers.newrole === "Sales Lead") {
+          idToUpdate.role_id = 1;
+        } else if (answer.newrole === "Sales person") {
+          idToUpdate.role_id = 2;
+        } else if (answer.newrole === "Lawyer") {
+          idToUpdate.role_id = 3;
+        }
+        connection.query(
+          "UPDATE employee SET role_id = ? WHERE id = ?",
+          [idToUpdate.role_id, idToUpdate.employeeId],
+          function (err, result) {
+            console / log(result);
           }
-        ])
-        .then(function(answer) {
-          console.log("about to update", answer);
-          const idToUpdate = {};
-          idToUpdate.employeeId = parseInt(answer.updateEmpRole.split(" ")[0]);
-          if (answer.newrole === "manager") {
-            idToUpdate.role_id = 1;
-          } else if (answer.newrole === "employee") {
-            idToUpdate.role_id = 2;
-          }
-          connection.query(
-            "UPDATE employee SET role_id = ? WHERE id = ?",
-            [idToUpdate.role_id, idToUpdate.employeeId],
-            function(err, data) {
-              askQ();
-            }
-          );
-        });
-    });
-  }
+        );
+        startQue();
+      });
+  });
+}
 // start function call
 startQue();
