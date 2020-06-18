@@ -1,5 +1,5 @@
 const inquirer = require("inquirer");
-const consoleTable = require("console.table");
+//const consoleTable = require("console.table");
 const connection = require("./db/db.js");
 const mysql = require("mysql");
 
@@ -129,20 +129,21 @@ function addEmployee() {
       },
     ])
     .then((answers) => {
+      console.log(answers);
       connection.query(
-        "INSERT INTO employee (first_name, last_name, role_id,manager_id) VALUES ?",
+        "INSERT INTO employee SET ?",
         {
           first_name: answers.first_name,
           last_name: answers.last_name,
           role_id: null,
           manager_id: null,
         },
-        function (err, answers) {
+        function (err, result) {
           if (err) {
             throw err;
           }
           console.log(first_name, last_name, "was added to the database");
-          console.table(answers);
+          console.table(result);
         }
       );
       startQue();
@@ -200,9 +201,9 @@ function view_all_emp() {
   connection.query(query, (err, result) => {
     if (err) throw err;
     // Log all results of the SELECT statement
-    console.log(result);
+    //;console.log(result);
 
-    //console.table()
+    console.table(result);
   });
   startQue();
 }
@@ -251,18 +252,23 @@ function upd_emp_role() {
         console.log("about to update", answers);
         const idToUpdate = {};
         idToUpdate.employeeId = parseInt(answers.updateEmpRole.split(" ")[0]);
+        // console.log(idToUpdate);
+
         if (answers.newrole === "Sales Lead") {
           idToUpdate.role_id = 1;
-        } else if (answer.newrole === "Sales person") {
+        } else if (answers.newrole === "Sales person") {
           idToUpdate.role_id = 2;
-        } else if (answer.newrole === "Lawyer") {
+        } else if (answers.newrole === "Lawyer") {
           idToUpdate.role_id = 3;
         }
+        console.log(answers.newrole);
+        console.log(idToUpdate.role_id, "+", idToUpdate.empid);
         connection.query(
           "UPDATE employee SET role_id = ? WHERE id = ?",
-          [idToUpdate.role_id, idToUpdate.employeeId],
+          [idToUpdate.role_id, idToUpdate.empid],
           function (err, result) {
-            console / log(result);
+            // if (err) throw err;
+            console.log(err);
           }
         );
         startQue();
