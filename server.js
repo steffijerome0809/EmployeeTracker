@@ -159,24 +159,27 @@ function view_emp_by_dep() {
   //   select e.first_name as firstname ,e.last_name as lastname from employee e ,role r join department d on r.department_id=d.id where d.name="Sales";
   inquirer
     .prompt({
-      type: "input",
+      type: "list",
       name: "departmentname",
       message: "Which department employees do you want to view ?",
+      choices: ["Management", "Legal", "Sales", "Engineering", "Finance"],
     })
     .then((answers) => {
       var query =
-        "select e.first_name as firstname ,e.last_name as lastname from employee e ,role r join department d on r.department_id=d.id where d.name=?";
+        "select em.first_name as firstname ,em.last_name as lastname from employee e join employee em on e.empid=em.manager_id";
+      query +=
+        " join role r on r.roleid=em.role_id join department d on d.id=r.department_id where d.name=?";
+
       connection.query(query, [answers.departmentname], (err, result) => {
         console.log(result.length + "matches found");
         //console.log(result);
-        console.table(answers);
+        console.table(result);
       });
       startQue();
     });
 }
 
 function view_emp_by_manager() {
-  //  select em.first_name as firstname ,em.last_name as lastname,concat(e.first_name," ",e.last_name) as manager from employee e join employee em on e.empid=em.manager_id;
   inquirer
     .prompt({
       type: "input",
@@ -188,8 +191,8 @@ function view_emp_by_manager() {
         "select em.first_name as firstname ,em.last_name as lastname, CONCAT(e.first_name,' ',e.last_name) as manager from employee e join employee em on e.empid=em.manager_id where e.first_name=?";
       connection.query(query, [answers.managername], (err, result) => {
         console.log(result.length + "matches found");
-        //console.log(result);
-        console.table(answers);
+
+        console.table(result);
       });
       startQue();
     });
@@ -236,6 +239,7 @@ function upd_emp_role() {
         answer[i].last_name;
       allemp.push(employeeString);
     }
+
     // console.log(allemp)
 
     inquirer
@@ -259,12 +263,31 @@ function upd_emp_role() {
         idToUpdate.employeeId = parseInt(answers.updateEmpRole.split(" ")[0]);
         // console.log(idToUpdate);
 
-        if (answers.newrole === "Sales Lead") {
-          idToUpdate.role_id = 1;
-        } else if (answers.newrole === "Sales person") {
-          idToUpdate.role_id = 2;
-        } else if (answers.newrole === "Lawyer") {
-          idToUpdate.role_id = 3;
+        switch (answers.newrole) {
+          case "Sales Lead":
+            idToUpdate.role_id = 1;
+            break;
+          case "Sales person":
+            idToUpdate.role_id = 2;
+            break;
+          case "Lawyer":
+            idToUpdate.role_id = 3;
+            break;
+          case "Lead Engineer":
+            idToUpdate.role_id = 4;
+            break;
+          case "Software Engineer":
+            idToUpdate.role_id = 5;
+            break;
+          case "Account Manager":
+            idToUpdate.role_id = 6;
+            break;
+          case "Accountant":
+            idToUpdate.role_id = 7;
+            break;
+          case "Legal Team Lead":
+            idToUpdate.role_id = 8;
+            break;
         }
         console.log(answers.newrole);
         console.log(idToUpdate.role_id, "+", idToUpdate.employeeId);
