@@ -280,18 +280,7 @@ function upd_emp_role() {
 
 function upd_emp_manager() {
   let allemp = [];
-  let role = [
-    "Sales Lead",
-    "Sales person",
-    "Lead Engineer",
-    "Software Engineer",
-    "Account Manager",
-    "Accountant",
-    "Legal Team Lead",
-    "Lawyer",
-  ];
   connection.query("SELECT * FROM employee", function (err, answer) {
-    // console.log(answer);
     for (let i = 0; i < answer.length; i++) {
       let employeeString =
         answer[i].empid +
