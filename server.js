@@ -49,6 +49,9 @@ const startQue = function () {
         case "update employee manager":
           upd_emp_manager();
           break;
+        case "remove employee":
+          remove_emp();
+          break;
       }
     });
 };
@@ -322,6 +325,49 @@ function upd_emp_manager() {
         connection.query(
           "UPDATE employee SET manager_id= ? WHERE empid = ?",
           [idToUpdate.managerId, idToUpdate.employeeId],
+          function (err, result) {
+            if (err) throw err;
+            console.table(result);
+          }
+        );
+        startQue();
+      });
+  });
+}
+
+function remove_emp() {
+  let allemp = [];
+
+  connection.query("SELECT * FROM employee", function (err, answer) {
+    for (let i = 0; i < answer.length; i++) {
+      let employeeString =
+        answer[i].empid +
+        " " +
+        answer[i].first_name +
+        " " +
+        answer[i].last_name;
+      allemp.push(employeeString);
+    }
+    // console.log(allemp)
+
+    inquirer
+      .prompt([
+        {
+          type: "list",
+          name: "removeEmp",
+          message: "select employee that you want to remove ",
+          choices: allemp,
+        },
+      ])
+      .then(function (answers) {
+        console.log("about to delete", answers);
+        const idToRemove = {};
+        idToRemove.employeeId = parseInt(answers.removeEmp.split(" ")[0]);
+        console.log(idToRemove.employeeId);
+
+        connection.query(
+          "DELETE FROM employee  WHERE empid = ?",
+          [idToRemove.employeeId],
           function (err, result) {
             if (err) throw err;
             console.table(result);
