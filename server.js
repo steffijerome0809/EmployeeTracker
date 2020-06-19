@@ -1,5 +1,4 @@
 const inquirer = require("inquirer");
-//const consoleTable = require("console.table");
 const connection = require("./db/db.js");
 const mysql = require("mysql");
 
@@ -46,6 +45,9 @@ const startQue = function () {
           break;
         case "update employee role":
           upd_emp_role();
+          break;
+        case "update employee manager":
+          upd_emp_manager();
           break;
       }
     });
@@ -142,7 +144,7 @@ function addEmployee() {
           if (err) {
             throw err;
           }
-          console.log(first_name, last_name, "was added to the database");
+          console.log(first_name + last_name, "was added to the database");
           console.table(result);
         }
       );
@@ -262,18 +264,84 @@ function upd_emp_role() {
           idToUpdate.role_id = 3;
         }
         console.log(answers.newrole);
-        console.log(idToUpdate.role_id, "+", idToUpdate.empid);
+        console.log(idToUpdate.role_id, "+", idToUpdate.employeeId);
         connection.query(
-          "UPDATE employee SET role_id = ? WHERE id = ?",
-          [idToUpdate.role_id, idToUpdate.empid],
+          "UPDATE employee SET role_id = ? WHERE empid = ?",
+          [idToUpdate.role_id, idToUpdate.employeeId],
           function (err, result) {
             // if (err) throw err;
-            console.log(err);
+            console.table(result);
           }
         );
         startQue();
       });
   });
 }
+
+function upd_emp_manager() {
+  let allemp = [];
+  let role = [
+    "Sales Lead",
+    "Sales person",
+    "Lead Engineer",
+    "Software Engineer",
+    "Account Manager",
+    "Accountant",
+    "Legal Team Lead",
+    "Lawyer",
+  ];
+  connection.query("SELECT * FROM employee", function (err, answer) {
+    // console.log(answer);
+    for (let i = 0; i < answer.length; i++) {
+      let employeeString =
+        answer[i].empid +
+        " " +
+        answer[i].first_name +
+        " " +
+        answer[i].last_name;
+      allemp.push(employeeString);
+    }
+    // console.log(allemp)
+
+    inquirer
+      .prompt([
+        {
+          type: "list",
+          name: "updateempManager",
+          message: "select employee to update manager",
+          choices: allemp,
+        },
+        {
+          type: "list",
+          message: "select new manager",
+          choices: allemp,
+          name: "newManager",
+        },
+      ])
+      .then(function (answers) {
+        console.log("about to update", answers);
+        const idToUpdate = {};
+        idToUpdate.employeeId = parseInt(
+          answers.updateempManager.split(" ")[0]
+        );
+        //console.log(idToUpdate.employeeId);
+
+        idToUpdate.managerId = parseInt(answers.newManager.split(" ")[0]);
+
+        //console.log(idToUpdate.managerId);
+
+        connection.query(
+          "UPDATE employee SET manager_id= ? WHERE empid = ?",
+          [idToUpdate.managerId, idToUpdate.employeeId],
+          function (err, result) {
+            if (err) throw err;
+            console.table(result);
+          }
+        );
+        startQue();
+      });
+  });
+}
+
 // start function call
 startQue();
